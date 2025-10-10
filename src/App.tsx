@@ -9,10 +9,14 @@ import SegregationGuide from "./pages/SegregationGuide";
 import ImageUpload from "./pages/ImageUpload";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import ModelTest from "./components/ModelTest";
+import ModelDebug from "./components/ModelDebug";
+
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -24,11 +28,14 @@ const App = () => (
           <Route path="/guide" element={<SegregationGuide />} />
           <Route path="/upload" element={<ImageUpload />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/test" element={<ModelTest />} />
+          <Route path="/debug" element={<ModelDebug />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </>
 );
 
 export default App;

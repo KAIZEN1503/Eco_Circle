@@ -15,7 +15,7 @@ const SegregationGuide = () => {
     { name: "Metal Cans", category: "Recyclable", color: "blue" },
     { name: "Glass Containers", category: "Recyclable", color: "blue" },
     { name: "Electronics", category: "E-Waste", color: "purple" },
-    { name: "Batteries", category: "Hazardous", color: "red" },
+    { name: "Batteries", category: "Special", color: "orange" },
     { name: "Fabric & Textiles", category: "Recyclable", color: "blue" },
     { name: "Rubber Items", category: "Special", color: "orange" },
   ];
@@ -36,7 +36,6 @@ const SegregationGuide = () => {
       case "blue": return "bg-blue-100 text-blue-800 hover:bg-blue-200";
       case "green": return "bg-green-100 text-green-800 hover:bg-green-200";
       case "purple": return "bg-purple-100 text-purple-800 hover:bg-purple-200";
-      case "red": return "bg-red-100 text-red-800 hover:bg-red-200";
       case "orange": return "bg-orange-100 text-orange-800 hover:bg-orange-200";
       case "yellow": return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
       default: return "bg-gray-100 text-gray-800 hover:bg-gray-200";

@@ -6,58 +6,39 @@ import { Upload, Camera, RefreshCw, CheckCircle, AlertTriangle } from "lucide-re
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
+// Define the analysis result interface to match the new backend response
 interface AnalysisResult {
-  category: "wet" | "dry" | "hazardous";
+  predicted_class: string;
+  waste_type: string;
+  category: "wet" | "dry";
   confidence: number;
-  items: string[];
-  recommendations: string[];
 }
 
 const ImageUpload = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Mock AI analysis function
-  const mockAnalyzeWaste = (fileName: string): AnalysisResult => {
-    const scenarios = [
-      {
-        category: "wet" as const,
-        confidence: 0.87,
-        items: ["Fruit peels", "Vegetable scraps"],
-        recommendations: [
-          "This appears to be organic waste suitable for composting",
-          "Place in your green/wet waste bin",
-          "Consider starting a home compost system"
-        ]
-      },
-      {
-        category: "dry" as const,
-        confidence: 0.92,
-        items: ["Plastic bottle", "Paper wrapper"],
-        recommendations: [
-          "These items can be recycled",
-          "Clean the containers before recycling",
-          "Place in your blue/dry waste bin"
-        ]
-      },
-      {
-        category: "hazardous" as const,
-        confidence: 0.78,
-        items: ["Battery", "Electronic component"],
-        recommendations: [
-          "This requires special disposal methods",
-          "Take to designated e-waste collection center",
-          "Do not dispose in regular waste bins"
-        ]
-      }
-    ];
+  // New function to analyze waste using the backend API
+  const analyzeWasteWithBackend = async (file: File): Promise<AnalysisResult> => {
+    const formData = new FormData();
+    formData.append('image', file);
 
-    // Mock logic based on filename or random selection
-    const randomIndex = Math.floor(Math.random() * scenarios.length);
-    return scenarios[randomIndex];
+    const response = await fetch('http://localhost:5000/api/classify', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to analyze image');
+    }
+
+    return data.result;
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +64,8 @@ const ImageUpload = () => {
       });
       return;
     }
+     // Store both the file and its data URL
+    setUploadedFile(file);
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -98,28 +81,39 @@ const ImageUpload = () => {
   };
 
   const analyzeImage = async () => {
-    if (!uploadedImage) return;
+     if (!uploadedFile) return;
 
     setIsAnalyzing(true);
     
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
-    
-    const result = mockAnalyzeWaste("uploaded-image");
-    setAnalysisResult(result);
-    setIsAnalyzing(false);
+     try {
+      toast({
+        title: "Analyzing Image",
+        description: "Sending image to backend for analysis..."
+      });
 
-    toast({
-      title: "Analysis Complete",
-      description: `Detected ${result.category} waste with ${Math.round(result.confidence * 100)}% confidence`
-    });
+     const result = await analyzeWasteWithBackend(uploadedFile);
+      setAnalysisResult(result);
+
+      toast({
+        title: "Analysis Complete",
+        description: `Detected ${result.category} waste (${result.predicted_class}) with ${result.confidence}% confidence`
+      });
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to analyze the image. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "wet": return "bg-green-100 text-green-800";
       case "dry": return "bg-blue-100 text-blue-800";
-      case "hazardous": return "bg-red-100 text-red-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
@@ -128,13 +122,56 @@ const ImageUpload = () => {
     switch (category) {
       case "wet": return "💧";
       case "dry": return "🗑️";
-      case "hazardous": return "⚠️";
       default: return "❓";
     }
   };
 
+  // Items mapping based on the predicted class
+  const getItemsForClass = (predictedClass: string) => {
+    const itemsMap: Record<string, string[]> = {
+      "Battery": ["Batteries", "Rechargeable batteries", "AA/AAA batteries"],
+      "Biological": ["Food scraps", "Fruit peels", "Vegetable waste"],
+      "Cardboard": ["Boxes", "Packaging", "Newspaper"],
+      "Clothes": ["Textiles", "Fabrics", "Wool"],
+      "Glass": ["Bottles", "Jars", "Windows"],
+      "Metal": ["Cans", "Aluminum", "Steel"],
+      "Paper": ["Newspaper", "Magazines", "Office paper"],
+      "Plastic": ["Bottles", "Containers", "Bags"],
+      "Shoes": ["Footwear", "Leather", "Synthetic materials"],
+      "Trash": ["General waste", "Non-recyclable items", "Mixed materials"]
+    };
+    
+    return itemsMap[predictedClass] || ["Unknown items"];
+  };
+
+  // Recommendations mapping based on waste type
+  const getRecommendations = (wasteType: string) => {
+    const recommendationsMap: Record<string, string[]> = {
+      "Wet Waste": [
+        "This appears to be organic waste suitable for composting",
+        "Place in your green/wet waste bin",
+        "Consider starting a home compost system",
+        "Avoid meat and dairy in home composting"
+      ],
+      "Dry Waste": [
+        "These items can be recycled",
+        "Clean the containers before recycling",
+        "Place in your blue/dry waste bin",
+        "Remove labels when possible",
+        "Take electronics to designated collection centers"
+      ]
+    };
+    
+    return recommendationsMap[wasteType] || [
+      "Unable to classify automatically",
+      "Please manually sort based on material type",
+      "When in doubt, place in dry waste bin"
+    ];
+  };
+
   const resetUpload = () => {
     setUploadedImage(null);
+     setUploadedFile(null);
     setAnalysisResult(null);
     setIsAnalyzing(false);
     if (fileInputRef.current) {
@@ -148,14 +185,14 @@ const ImageUpload = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">
-            Waste Detection Simulator
+            AI Waste Detection
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Upload an image of waste items and our AI-powered system will help you identify the correct waste category.
+            Upload an image of waste items and our AI will help you identify the correct waste category.
           </p>
           <div className="mt-4 text-sm text-muted-foreground">
-            <Badge variant="secondary" className="mr-2">Demo Mode</Badge>
-            This is a simulation for demonstration purposes
+            <Badge variant="secondary" className="mr-2">TensorFlow</Badge>
+            Advanced AI-powered waste classification
           </div>
         </div>
 
@@ -266,10 +303,10 @@ const ImageUpload = () => {
                       {getCategoryIcon(analysisResult.category)}
                     </div>
                     <h3 className="text-2xl font-bold mb-2">
-                      {analysisResult.category.charAt(0).toUpperCase() + analysisResult.category.slice(1)} Waste
+                      {analysisResult.predicted_class} ({analysisResult.waste_type})
                     </h3>
                     <Badge className={getCategoryColor(analysisResult.category)}>
-                      {Math.round(analysisResult.confidence * 100)}% Confidence
+                      {analysisResult.confidence}% Confidence
                     </Badge>
                   </div>
 
@@ -280,7 +317,7 @@ const ImageUpload = () => {
                       Detected Items:
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {analysisResult.items.map((item, index) => (
+                      {getItemsForClass(analysisResult.predicted_class).map((item, index) => (
                         <Badge key={index} variant="outline">
                           {item}
                         </Badge>
@@ -292,7 +329,7 @@ const ImageUpload = () => {
                   <div>
                     <h4 className="font-semibold mb-3">Recommendations:</h4>
                     <ul className="space-y-2">
-                      {analysisResult.recommendations.map((rec, index) => (
+                      {getRecommendations(analysisResult.waste_type).map((rec, index) => (
                         <li key={index} className="flex items-start gap-2">
                           <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                           <span className="text-sm">{rec}</span>
@@ -314,43 +351,7 @@ const ImageUpload = () => {
           </Card>
         </div>
 
-        {/* Information Section */}
-        <Card className="mt-12 border-border">
-          <CardHeader>
-            <CardTitle>How It Works</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <span className="text-xl">📸</span>
-                </div>
-                <h3 className="font-semibold mb-2">1. Upload Image</h3>
-                <p className="text-sm text-muted-foreground">
-                  Take a clear photo of your waste items or upload from your device
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <span className="text-xl">🤖</span>
-                </div>
-                <h3 className="font-semibold mb-2">2. AI Analysis</h3>
-                <p className="text-sm text-muted-foreground">
-                  Our AI system analyzes the image to identify waste types and materials
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  <span className="text-xl">✅</span>
-                </div>
-                <h3 className="font-semibold mb-2">3. Get Results</h3>
-                <p className="text-sm text-muted-foreground">
-                  Receive categorization and disposal recommendations for proper waste management
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
       </div>
     </div>
   );

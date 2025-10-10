@@ -60,6 +60,38 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## How to run the application
+
+This project consists of two parts: a frontend (React) and a backend (Flask).
+
+### Running the Backend
+
+1. Install the required dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Start the Flask server:
+```bash
+python app.py
+```
+
+The backend will start on `http://localhost:5000`.
+
+### Running the Frontend
+
+1. Install the required dependencies:
+```bash
+npm install
+```
+
+2. Start the development server:
+```bash
+npm run dev
+```
+
+The frontend will start on `http://localhost:5173`.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/d6cabbad-1e01-4eef-9f0a-f718074b20ba) and click on Share -> Publish.

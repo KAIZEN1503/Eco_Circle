@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import emailjs from "@emailjs/browser"; // ✅ import EmailJS
 
 interface FormData {
   name: string;
@@ -33,14 +34,12 @@ const Contact = () => {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     } else if (formData.name.trim().length < 2) {
       newErrors.name = "Name must be at least 2 characters";
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
@@ -48,7 +47,6 @@ const Contact = () => {
       newErrors.email = "Please enter a valid email address";
     }
 
-    // Message validation
     if (!formData.message.trim()) {
       newErrors.message = "Message is required";
     } else if (formData.message.trim().length < 10) {
@@ -73,27 +71,46 @@ const Contact = () => {
 
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      
+      await emailjs.send(
+        "service_wnqnx0o",      
+        "template_um333i9",    
+        {
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+        },
+        "k8k92IgHiiCcUWVsK"     
+      );
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+      setIsSubmitting(false);
+      setIsSubmitted(true);
 
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you soon."
-    });
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for contacting us. We'll get back to you soon."
+      });
 
-    // Reset form after successful submission
-    setTimeout(() => {
-      setFormData({ name: "", email: "", message: "" });
-      setIsSubmitted(false);
-    }, 3000);
+      // Reset form after success
+      setTimeout(() => {
+        setFormData({ name: "", email: "", message: "" });
+        setIsSubmitted(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      setIsSubmitting(false);
+      toast({
+        title: "Failed to Send",
+        description: "Something went wrong. Please try again later.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -101,21 +118,22 @@ const Contact = () => {
 
   const contactInfo = [
     {
+
       icon: <Mail className="w-5 h-5" />,
       title: "Email",
-      content: "contact@ecowaste.com",
+      content: "ecowaste12@gmail.com",
       description: "Send us an email anytime"
     },
     {
       icon: <Phone className="w-5 h-5" />,
       title: "Phone",
-      content: "+1 (555) 123-4567",
+      content: "+91-7718983499",
       description: "Call us during business hours"
     },
     {
       icon: <MapPin className="w-5 h-5" />,
       title: "Address",
-      content: "123 Green Street, Eco City, EC 12345",
+      content: "123 Green Street, Eco City, Thane(west), Maharashtra, India",
       description: "Visit our eco-friendly office"
     }
   ];
@@ -266,18 +284,6 @@ const Contact = () => {
                     <span className="font-medium">Closed</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border bg-gradient-to-br from-primary/5 to-primary-glow/5">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-foreground mb-3">Quick Tips</h3>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>• For urgent waste management queries, call us directly</li>
-                  <li>• Include photos for better assistance with waste identification</li>
-                  <li>• Check our FAQ section for common questions</li>
-                  <li>• Follow us on social media for waste management tips</li>
-                </ul>
               </CardContent>
             </Card>
           </div>
