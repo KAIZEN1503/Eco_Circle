@@ -2,20 +2,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Droplets, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, Droplets, ChevronDown, ChevronUp, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SegregationGuide = () => {
   const [showDryWaste, setShowDryWaste] = useState(true);
   const [showWetWaste, setShowWetWaste] = useState(true);
+  const [showEWaste, setShowEWaste] = useState(true);
 
   const dryWasteItems = [
     { name: "Plastic Bottles", category: "Recyclable", color: "blue" },
     { name: "Paper & Cardboard", category: "Recyclable", color: "blue" },
     { name: "Metal Cans", category: "Recyclable", color: "blue" },
     { name: "Glass Containers", category: "Recyclable", color: "blue" },
-    { name: "Electronics", category: "E-Waste", color: "purple" },
-    { name: "Batteries", category: "Special", color: "orange" },
     { name: "Fabric & Textiles", category: "Recyclable", color: "blue" },
     { name: "Rubber Items", category: "Special", color: "orange" },
   ];
@@ -31,6 +30,17 @@ const SegregationGuide = () => {
     { name: "Dairy Products", category: "Organic", color: "yellow" },
   ];
 
+  const eWasteItems = [
+    { name: "Mobile Phones", category: "Electronics", color: "purple" },
+    { name: "Laptops & Computers", category: "Electronics", color: "purple" },
+    { name: "Batteries", category: "Hazardous", color: "red" },
+    { name: "Televisions", category: "Electronics", color: "purple" },
+    { name: "Refrigerators", category: "Appliances", color: "indigo" },
+    { name: "Washing Machines", category: "Appliances", color: "indigo" },
+    { name: "Chargers & Cables", category: "Accessories", color: "purple" },
+    { name: "LED Bulbs", category: "Lighting", color: "orange" },
+  ];
+
   const getBadgeColor = (color: string) => {
     switch (color) {
       case "blue": return "bg-blue-100 text-blue-800 hover:bg-blue-200";
@@ -38,6 +48,8 @@ const SegregationGuide = () => {
       case "purple": return "bg-purple-100 text-purple-800 hover:bg-purple-200";
       case "orange": return "bg-orange-100 text-orange-800 hover:bg-orange-200";
       case "yellow": return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+      case "red": return "bg-red-100 text-red-800 hover:bg-red-200";
+      case "indigo": return "bg-indigo-100 text-indigo-800 hover:bg-indigo-200";
       default: return "bg-gray-100 text-gray-800 hover:bg-gray-200";
     }
   };
@@ -75,9 +87,18 @@ const SegregationGuide = () => {
             Wet Waste Examples
             {showWetWaste ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </Button>
+          <Button
+            onClick={() => setShowEWaste(!showEWaste)}
+            variant={showEWaste ? "default" : "outline"}
+            className="flex items-center gap-2"
+          >
+            <Zap className="w-4 h-4" />
+            E-Waste Examples
+            {showEWaste ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </Button>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-3 gap-8">
           {/* Dry Waste Section */}
           <Card className={cn(
             "transition-all duration-500 border-border",
@@ -97,14 +118,14 @@ const SegregationGuide = () => {
             <CardContent className="p-6">
               {showDryWaste && (
                 <div className="space-y-4 animate-in slide-in-from-top-4 duration-300">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
                     {dryWasteItems.map((item, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
                       >
-                        <span className="font-medium text-foreground">{item.name}</span>
-                        <Badge className={getBadgeColor(item.color)}>
+                        <span className="font-medium text-foreground text-sm">{item.name}</span>
+                        <Badge className={cn(getBadgeColor(item.color), "shrink-0 ml-2")}>
                           {item.category}
                         </Badge>
                       </div>
@@ -143,14 +164,14 @@ const SegregationGuide = () => {
             <CardContent className="p-6">
               {showWetWaste && (
                 <div className="space-y-4 animate-in slide-in-from-top-4 duration-300">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
                     {wetWasteItems.map((item, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
                       >
-                        <span className="font-medium text-foreground">{item.name}</span>
-                        <Badge className={getBadgeColor(item.color)}>
+                        <span className="font-medium text-foreground text-sm">{item.name}</span>
+                        <Badge className={cn(getBadgeColor(item.color), "shrink-0 ml-2")}>
                           {item.category}
                         </Badge>
                       </div>
@@ -169,45 +190,54 @@ const SegregationGuide = () => {
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Best Practices */}
-        <Card className="mt-12 border-border">
-          <CardHeader>
-            <CardTitle className="text-2xl">Best Practices for Waste Segregation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">🗂️</span>
+          {/* E-Waste Section */}
+          <Card className={cn(
+            "transition-all duration-500 border-border",
+            showEWaste ? "opacity-100 transform-none" : "opacity-50 transform scale-95"
+          )}>
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-t-lg">
+              <CardTitle className="flex items-center gap-3 text-2xl">
+                <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="font-semibold mb-2">Separate at Source</h3>
-                <p className="text-sm text-muted-foreground">
-                  Use different bins for different types of waste right from your home or office.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">🧽</span>
+                E-Waste
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Electronic waste requiring special handling and recycling
+              </p>
+            </CardHeader>
+            <CardContent className="p-6">
+              {showEWaste && (
+                <div className="space-y-4 animate-in slide-in-from-top-4 duration-300">
+                  <div className="grid grid-cols-1 gap-3">
+                    {eWasteItems.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                      >
+                        <span className="font-medium text-foreground text-sm">{item.name}</span>
+                        <Badge className={cn(getBadgeColor(item.color), "shrink-0 ml-2")}>
+                          {item.category}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 p-4 bg-purple-50 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-2">E-Waste Disposal Tips:</h4>
+                    <ul className="text-sm text-purple-800 space-y-1">
+                      <li>• Never throw e-waste in regular trash</li>
+                      <li>• Take to certified e-waste collection centers</li>
+                      <li>• Remove batteries before disposal</li>
+                      <li>• Donate working electronics for reuse</li>
+                      <li>• Wipe personal data from devices</li>
+                    </ul>
+                  </div>
                 </div>
-                <h3 className="font-semibold mb-2">Clean Before Disposal</h3>
-                <p className="text-sm text-muted-foreground">
-                  Rinse containers and remove food residue to improve recycling quality.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">📚</span>
-                </div>
-                <h3 className="font-semibold mb-2">Learn Local Rules</h3>
-                <p className="text-sm text-muted-foreground">
-                  Check your local waste management guidelines for specific requirements.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

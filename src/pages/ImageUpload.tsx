@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 interface AnalysisResult {
   predicted_class: string;
   waste_type: string;
-  category: "wet" | "dry";
+  category: "wet" | "dry" | "ewaste";
   confidence: number;
 }
 
@@ -114,6 +114,7 @@ const ImageUpload = () => {
     switch (category) {
       case "wet": return "bg-green-100 text-green-800";
       case "dry": return "bg-blue-100 text-blue-800";
+      case "ewaste": return "bg-purple-100 text-purple-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
@@ -122,6 +123,7 @@ const ImageUpload = () => {
     switch (category) {
       case "wet": return "💧";
       case "dry": return "🗑️";
+      case "ewaste": return "⚡";
       default: return "❓";
     }
   };
@@ -157,8 +159,14 @@ const ImageUpload = () => {
         "These items can be recycled",
         "Clean the containers before recycling",
         "Place in your blue/dry waste bin",
-        "Remove labels when possible",
-        "Take electronics to designated collection centers"
+        "Remove labels when possible"
+      ],
+      "E-Waste": [
+        "This is electronic waste requiring special handling",
+        "Never throw e-waste in regular trash",
+        "Take to certified e-waste collection centers",
+        "Remove batteries before disposal",
+        "Wipe personal data from electronic devices"
       ]
     };
     

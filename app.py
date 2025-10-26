@@ -34,9 +34,9 @@ try:
         "8": "Shoes", "9": "Trash"
     }
 
-    # Map fine-grained labels to Wet/Dry Waste
-    wet_dry_map = {
-        "Battery": "Dry Waste",
+    # Map fine-grained labels to Wet/Dry/E-Waste
+    waste_category_map = {
+        "Battery": "E-Waste",
         "Biological": "Wet Waste",
         "Cardboard": "Dry Waste",
         "Clothes": "Dry Waste",
@@ -90,10 +90,15 @@ def classify():
 
         predicted_class_idx = logits.argmax(-1).item()
         predicted_class = labels[str(predicted_class_idx)]
-        waste_type = wet_dry_map[predicted_class]
+        waste_type = waste_category_map[predicted_class]
 
-        # Convert waste_type to match frontend expectations (wet/dry)
-        category = "wet" if waste_type == "Wet Waste" else "dry"
+        # Convert waste_type to match frontend expectations (wet/dry/ewaste)
+        if waste_type == "Wet Waste":
+            category = "wet"
+        elif waste_type == "E-Waste":
+            category = "ewaste"
+        else:
+            category = "dry"
         
         # Confidence estimation (using softmax)
         probs = torch.nn.functional.softmax(logits, dim=-1)
