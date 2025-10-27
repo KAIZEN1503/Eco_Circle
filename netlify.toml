@@ -2,7 +2,8 @@
 # Backend (Python/Flask) is deployed separately on Render
 
 [build]
-  command = "npm run build"
+  # Explicitly install dependencies first, then build
+  command = "npm install && npm run build"
   publish = "dist"
 
 # React Router SPA redirects
@@ -15,4 +16,4 @@
 [build.environment]
   NODE_VERSION = "18"
   # Disable Python auto-detection
-  NPM_FLAGS = "--ignore-scripts"
+  NPM_FLAGS = "--legacy-peer-deps"
