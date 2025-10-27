@@ -1,11 +1,18 @@
+# Netlify configuration for FRONTEND ONLY
+# Backend (Python/Flask) is deployed separately on Render
+
 [build]
   command = "npm run build"
   publish = "dist"
 
+# React Router SPA redirects
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+# Build environment
 [build.environment]
   NODE_VERSION = "18"
+  # Disable Python auto-detection
+  NPM_FLAGS = "--ignore-scripts"

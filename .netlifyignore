@@ -1,0 +1,32 @@
+# Netlify should ignore all Python-related files
+# These are ONLY for the backend deployment on Render
+
+# Python files
+*.py
+app.py
+requirements.txt
+runtime.txt
+
+# Python virtual environment
+wasteenv/
+venv/
+env/
+*.pyc
+__pycache__/
+
+# Python scripts and utilities
+scripts/*.py
+convert_model.py
+convert_manual.py
+inspect_model.py
+
+# Backend-only files
+uploads/
+*.md
+README.md
+DEPLOYMENT*.md
+RENDER*.md
+QUICK*.md
+SETUP.md
+MODEL*.md
+CONVERT*.md
