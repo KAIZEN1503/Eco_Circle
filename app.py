@@ -9,7 +9,18 @@ import torch
 import io
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+# Configure CORS for production and development
+allowed_origins = os.environ.get('FRONTEND_URL', 'http://localhost:5173').split(',')
+allowed_origins.append('http://localhost:5173')  # Always allow local development
+
+CORS(app, resources={
+    r"/api/*": {
+        "origins": allowed_origins,
+        "methods": ["GET", "POST"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 # Paths and limits
 UPLOAD_DIR = "uploads"
@@ -121,5 +132,8 @@ def too_large(e):
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
-    print(f"API running on http://localhost:{port}")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    debug_mode = os.environ.get('FLASK_ENV', 'production') != 'production'
+    print(f"🚀 API running on http://0.0.0.0:{port}")
+    print(f"🌍 Environment: {'Development' if debug_mode else 'Production'}")
+    print(f"🔒 CORS allowed origins: {allowed_origins}")
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
