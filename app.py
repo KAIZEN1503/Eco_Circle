@@ -120,5 +120,6 @@ def too_large(e):
     return jsonify({"success": False, "error": f"File too large. Max {MAX_FILE_SIZE_MB}MB"}), 413
 
 if __name__ == "__main__":
-    print(f"API running on http://localhost:5000")
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"API running on http://localhost:{port}")
+    app.run(host='0.0.0.0', port=port, debug=True)
