@@ -15,7 +15,7 @@ When creating a new Web Service on Render, use these settings:
 ### Build & Deploy
 - **Build Command**: 
   ```bash
-  pip install -r requirements.txt
+  pip install -r requirements-backend.txt
   ```
 
 - **Start Command**: 

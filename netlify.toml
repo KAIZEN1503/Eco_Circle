@@ -1,10 +1,13 @@
 # Netlify configuration for FRONTEND ONLY
 # Backend (Python/Flask) is deployed separately on Render
+# IMPORTANT: Disable Python auto-detection completely
 
 [build]
   # Explicitly install dependencies first, then build
   command = "npm install && npm run build"
   publish = "dist"
+  # Ignore requirements.txt to prevent Python installation
+  ignore = "/bin/false"
 
 # React Router SPA redirects
 [[redirects]]
@@ -15,5 +18,7 @@
 # Build environment
 [build.environment]
   NODE_VERSION = "18"
-  # Disable Python auto-detection
+  # Explicitly disable Python
+  PYTHON_VERSION = ""
+  # Use legacy peer deps for npm
   NPM_FLAGS = "--legacy-peer-deps"
